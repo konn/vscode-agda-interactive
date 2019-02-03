@@ -1,0 +1,11 @@
+{
+  "DisplayInfo": {
+    "prefix": "resp",
+    "body": [
+      "export interface ${1:Response} {",
+      "  kind: \"$1\";",
+      "  ${2:${3:payload}: ${4:string};$5}",
+      "}$0"
+    ]
+  }
+}
