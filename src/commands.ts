@@ -247,9 +247,9 @@ export class InferToplevel extends Interaction {
 }
 
 export enum ComputeMode {
-  DefaultCompute,
-  IgnoreAbstract,
-  UseShowInstance
+  DefaultCompute = "DefaultCompute",
+  IgnoreAbstract = "IgnoreAbstract",
+  UseShowInstance = "UseShowInstance"
 }
 
 export class ComputeToplevel extends Interaction {
@@ -267,8 +267,8 @@ export class LoadHighlightingInfo extends Interaction {
 }
 
 export enum Remove {
-  Remove,
-  Keep
+  Remove = "Remove",
+  Keep = "Keep"
 }
 
 export class TokenHighlighting extends Interaction {
