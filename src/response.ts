@@ -1,5 +1,5 @@
 import * as di from "./display-info";
-import { AgdaRange } from "./commands";
+import { readFileSync } from "fs";
 
 export type Response =
   | HighlightingInfo
@@ -56,13 +56,13 @@ export type HighlightingInfo =
 export interface DirectHighlightingInfo {
   kind: "HighlightingInfo";
   direct: true;
-  info: {
-    remove: boolean;
-    payload: [AgdaRange, Aspects][];
-  };
+  info: HighlightInfoBody;
 }
 
-export interface Aspect {}
+export interface HighlightInfoBody {
+  remove: boolean;
+  payload: [HighlightingRange, Aspects][];
+}
 
 export interface DefinitionSite {
   filepath: string;
@@ -130,4 +130,17 @@ export interface RunningInfo {
 export interface ClearHighlighting {
   kind: "ClearHighlighting";
   tokenBased: TokenBased;
+}
+
+export function parseHighlightInfo(path: string): HighlightInfoBody {
+  const {
+    remove,
+    payload: pays
+  }: { remove: boolean; payload: Aspects[] } = JSON.parse(
+    readFileSync(path).toString()
+  );
+  const payload: [HighlightingRange, Aspects][] = pays.map(
+    (a: Aspects): [HighlightingRange, Aspects] => [a.range, a]
+  );
+  return { remove, payload };
 }

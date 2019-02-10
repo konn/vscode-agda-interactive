@@ -33,7 +33,10 @@ export abstract class HaskDataCon implements ToHaskell {
 export class Load extends Interaction {
   constructor(target: string, argv: string[]) {
     super();
-    this.args = [new HaskellString(target), new HaskellList(argv)];
+    this.args = [
+      new HaskellString(target),
+      new HaskellList(argv.map(i => new HaskellString(i)))
+    ];
   }
 }
 
@@ -54,7 +57,10 @@ export enum CompilerBackend_ {
 export class Compile extends Interaction {
   constructor(public backend: CompilerBackend, public argv: string[]) {
     super();
-    this.args = [this.backend, new HaskellList(this.argv)];
+    this.args = [
+      this.backend,
+      new HaskellList(this.argv.map(i => new HaskellString(i)))
+    ];
   }
 }
 

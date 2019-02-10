@@ -8,20 +8,68 @@
     "vscode": "^1.30.0"
   },
   "dependencies": {
-    "change-case": "^3.1.0"
+    "await-semaphore": "^0.1.3",
+    "change-case": "^3.1.0",
+    "npm": "^6.7.0"
   },
   "categories": [
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.sayHello"
+    "onLanguage:agda"
   ],
   "main": "./out/extension",
   "contributes": {
+    "keybindings": [
+      {
+        "command": "agda-interactive.load-file",
+        "key": "Ctrl+C Ctrl+L",
+        "mac": "Ctrl+C Ctrl+L",
+        "linux": "Ctrl+C Ctrl+L",
+        "when": "onLanguage:agda"
+      }
+    ],
     "commands": [
       {
-        "command": "extension.sayHello",
-        "title": "Hello World"
+        "command": "agda-interactive.load-file",
+        "title": "Load Agda File"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "Agda Interactive Configuration",
+        "properties": {
+          "agda-interactive.program.executable": {
+            "title": "Agda Executable",
+            "markdownDescription": "Path to the `agda` executable",
+            "type": "string",
+            "default": "agda"
+          },
+          "agda-interactive.program.libraries": {
+            "title": "Agda default libraries",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "standard-library"
+            ],
+            "markdownDescription": "Libraries passed with `-l` options"
+          },
+          "agda-interactive.program.args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "markdownDescription": "Optional arguments passed to agda (except `--interaction-json` and libraries)"
+          },
+          "agda-interactive.highlighting": {
+            "type": "object",
+            "title": "Highlighting related colour and style definitions",
+            "markdownDescription": "Configure the color-scheme for dynamic semantic highlighting. This settings will be gone when VSCode once implements semantic highlighting (see issue #585)"
+          }
+        }
       }
     ]
   },
