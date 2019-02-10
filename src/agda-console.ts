@@ -45,8 +45,8 @@ export class AgdaConsole extends Transform {
       const rest = this.processPrompt(lines[lines.length - 1]);
       this.buffer += rest;
     } else {
-      const line = this.processPrompt(chunk);
-      this.buffer += line;
+      this.buffer += chunk;
+      this.buffer = this.processPrompt(this.buffer);
     }
     callback();
   }
