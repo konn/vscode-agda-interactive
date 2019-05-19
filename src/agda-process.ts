@@ -12,10 +12,11 @@ import {
   DiagnosticCollection,
   languages,
   Diagnostic,
-  DiagnosticSeverity
+  Uri
 } from "vscode";
 import { ChildProcess, spawn } from "child_process";
 import IOTCM from "./iotcm";
+import * as ErrorParser from "./error-parser";
 import {
   HighlightingLevel,
   HighlightingMethod,
@@ -112,13 +113,10 @@ export default class AgdaProcess implements Disposable {
           );
           this.agda.stdin.write(iotcm.toHaskell() + "\n");
           const listener = async (resp: ConsoleAction) => {
-            console.log(`Processing: ${JSON.stringify(resp)}`);
             if (resp === Idle.Idle) {
               this.inputStream.removeListener("data", listener);
             } else {
               const line = resp.payload;
-              console.log(`Input: ${JSON.stringify(line)}`);
-
               try {
                 const resp: Response | undefined = JSON.parse(line);
                 if (resp) {
@@ -199,17 +197,30 @@ export default class AgdaProcess implements Disposable {
     switch (info.kind) {
       case "Error":
         this.outputChan.appendLine(`[Error] ${info.payload}`);
-        const exists: Diagnostic[] = new Array(
-          ...(this.diags.get(this.document.uri) || [])
-        );
-        const { body, range } = splitLocation(info.payload);
-        exists.push({
-          range,
-          message: body,
-          severity: DiagnosticSeverity.Error
-        });
-        this.diags.set(this.document.uri, exists);
-        window.showErrorMessage(info.payload);
+        const exists: Map<string, Diagnostic[]> = new Map();
+        const resl: ErrorParser.Message[] = ErrorParser.parse(info.payload);
+        console.log(`Length: ${resl.length}`);
+        for (const i of resl) {
+          const path: string = i.location.file;
+          let target: Diagnostic[] | undefined = exists.get(path);
+          if (!target) {
+            target = [];
+            exists.set(path, target);
+          }
+          target.push({
+            range: rangeToLocation(i),
+            message: i.message,
+            severity: i.kind
+          });
+        }
+        for (const [key, ds] of exists) {
+          console.log(`Setting "${key}" foor ${JSON.stringify(ds)}`);
+          this.diags.delete(Uri.file(key));
+          this.diags.set(Uri.file(key), ds);
+        }
+
+        break;
+      case "AllGoalsWarnings":
         break;
 
       default:
@@ -261,4 +272,14 @@ export default class AgdaProcess implements Disposable {
       kv[1].dispose();
     }
   }
+}
+
+function locToPos(p: ErrorParser.Position): Position {
+  return new Position(p.line - 1, (p.column || 1) - 1);
+}
+
+function rangeToLocation(i: ErrorParser.Message): Range {
+  const start = locToPos(i.location.begin);
+  const end = locToPos(i.location.end);
+  return new Range(start, end);
 }
