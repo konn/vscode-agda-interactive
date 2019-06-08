@@ -8,7 +8,7 @@
     "vscode": "^1.30.0"
   },
   "dependencies": {
-    "querystringify": ">=2.0.0",
+    "querystringify": "~>2.0.0",
     "js-yaml": ">=3.13.1",
     "fstream": ">=1.0.12",
     "await-semaphore": "^0.1.3",

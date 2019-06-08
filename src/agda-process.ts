@@ -21,7 +21,11 @@ import {
   HighlightingLevel,
   HighlightingMethod,
   Load,
-  Interaction
+  Interaction,
+  Metas,
+  GoalType,
+  Rewrite,
+  NoRange
 } from "./commands";
 import { Mutex } from "await-semaphore";
 import {
@@ -33,7 +37,6 @@ import {
 import * as path from "path";
 import { toDecoration } from "./decorations";
 import { DisplayInfo } from "./display-info";
-import { splitLocation } from "./utils";
 import { AgdaConsole, ConsoleAction, Idle } from "./agda-console";
 import { Transform } from "stream";
 
@@ -181,6 +184,15 @@ export default class AgdaProcess implements Disposable {
 
         case "DisplayInfo":
           this.processDisplayInfo(editor, resp.info);
+          break;
+
+        case "InteractionPoints":
+          for (const iid of resp.interactionPoints) {
+            this.issueCommand(
+              editor,
+              new GoalType(Rewrite.AsIs, iid, NoRange.NoRange, "")
+            );
+          }
           break;
 
         default:
