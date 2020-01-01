@@ -193,7 +193,14 @@ export function toHaskell(hask: HaskellValue): string {
       return "False";
     }
   } else {
-    return hask.toHaskell();
+    console.log(`Haskelling: ${JSON.stringify(hask)} (of type ${typeof hask})`);
+    try {
+    const haskCode = hask.toHaskell();
+    return haskCode; 
+    } catch (e) {
+      console.log(`Failed Haskelling: ${JSON.stringify(hask)} (of type ${typeof hask})`);
+      throw e;
+    }
   }
 }
 export interface ToHaskell {

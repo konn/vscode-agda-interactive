@@ -1,9 +1,14 @@
-import { Range, Position } from "vscode";
+import { Range, Position, TextDocument } from "vscode";
 
 export interface StringWithLocation {
   body: string;
   file?: string;
   range: Range;
+}
+
+export function wiseButSlowPositionAt(document: TextDocument, n: number) {
+  const txt:string[] = [...document.getText()].slice(0, n);
+  return document.positionAt(txt.join("").length);
 }
 
 export function splitLocation(src: string): StringWithLocation {

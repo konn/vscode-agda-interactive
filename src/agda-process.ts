@@ -16,6 +16,7 @@ import {
 } from "vscode";
 import { ChildProcess, spawn } from "child_process";
 import IOTCM from "./iotcm";
+import * as utils from "./utils";
 import * as ErrorParser from "./error-parser";
 import {
   HighlightingLevel,
@@ -251,9 +252,10 @@ export default class AgdaProcess implements Disposable {
       ? resp.info
       : parseHighlightInfo(resp.filepath);
     if (info) {
+      console.log(`Highlighting ala: ${JSON.stringify(info)}`);
       for (const [[beg, end], asps] of info.payload) {
-        const start = editor.document.positionAt(beg - 1);
-        const stop = editor.document.positionAt(end - 1);
+        const start = utils.wiseButSlowPositionAt(editor.document, beg - 1);
+        const stop = utils.wiseButSlowPositionAt(editor.document, end - 1);
         const range = new Range(start, stop);
         // const remove = info.remove;
         if (info.remove) {
