@@ -223,7 +223,10 @@ export default class AgdaProcess implements Disposable {
       case "Error":
         this.outputChan.appendLine(`[Error] ${info.payload}`);
         const exists: Map<string, Diagnostic[]> = new Map();
-        const resl: ErrorParser.Message[] = ErrorParser.parse(info.payload);
+        console.log(`INFOERR: ${JSON.stringify(info)}`);
+        const resl: ErrorParser.Message[] = ErrorParser.parse(
+          info.payload || (info as any).message || ""
+        );
         console.log(`Length: ${resl.length}`);
         for (const i of resl) {
           const path: string = i.location.file;
