@@ -86,4 +86,11 @@ export default class CodePointCounter {
       return null;
     }
   }
+
+  public fromUtf16Offset(offset: number): number | undefined {
+    const pos = binarySearchLeast(this.units, v => v.offset >= offset);
+    if (pos >= 0) {
+      return pos;
+    }
+  }
 }

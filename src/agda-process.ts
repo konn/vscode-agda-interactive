@@ -26,7 +26,8 @@ import {
   Metas,
   GoalType,
   Rewrite,
-  NoRange
+  NoRange,
+  AgdaRange
 } from "./commands";
 import { Mutex } from "await-semaphore";
 import {
@@ -236,7 +237,7 @@ export default class AgdaProcess implements Disposable {
             exists.set(path, target);
           }
           target.push({
-            range: rangeToLocation(i),
+            range: this.fromAgdaLocation(i.location),
             message: i.message,
             severity: i.kind
           });
@@ -255,6 +256,24 @@ export default class AgdaProcess implements Disposable {
         console.log(`Unproc'd DispInfo: ${JSON.stringify(info)}`);
         break;
     }
+  }
+
+  private fromErrorPosition(pos: ErrorParser.Position): Position {
+    const line = pos.line - 1;
+    const colChs = (pos.column || 1) - 1;
+    const utf16LineOffset = this.document.offsetAt(new Position(line, 0));
+    const colOffset = this.codeCounter.fromUtf16Offset(utf16LineOffset) || 0;
+    const col =
+      (this.codeCounter.toUtf16Offset(colOffset + colChs) || colOffset) -
+      utf16LineOffset;
+    return new Position(line, col || 0);
+  }
+
+  private fromAgdaLocation(range: ErrorParser.Location): Range {
+    return new Range(
+      this.fromErrorPosition(range.begin),
+      this.fromErrorPosition(range.end)
+    );
   }
 
   async clearHighlighting() {
@@ -305,14 +324,4 @@ export default class AgdaProcess implements Disposable {
       kv[1].dispose();
     }
   }
-}
-
-function locToPos(p: ErrorParser.Position): Position {
-  return new Position(p.line - 1, (p.column || 1) - 1);
-}
-
-function rangeToLocation(i: ErrorParser.Message): Range {
-  const start = locToPos(i.location.begin);
-  const end = locToPos(i.location.end);
-  return new Range(start, end);
 }
