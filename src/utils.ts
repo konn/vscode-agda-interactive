@@ -7,7 +7,7 @@ export interface StringWithLocation {
 }
 
 export function wiseButSlowPositionAt(document: TextDocument, n: number) {
-  const txt:string[] = [...document.getText()].slice(0, n);
+  const txt: string[] = [...document.getText()].slice(0, n);
   return document.positionAt(txt.join("").length);
 }
 

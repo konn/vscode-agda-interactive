@@ -1,5 +1,7 @@
 import * as di from "./display-info";
 import { readFileSync } from "fs";
+import { Interaction, AgdaRange } from "./commands";
+import { Range } from "vscode";
 
 export type Response =
   | HighlightingInfo
@@ -44,9 +46,14 @@ export interface JumpToError {
 
 export type InteractionId = number;
 
+export interface InteractionPoint {
+  id: InteractionId;
+  range: AgdaRange;
+}
+
 export interface InteractionPoints {
   kind: "InteractionPoints";
-  interactionPoints: InteractionId[];
+  interactionPoints: InteractionPoint[];
 }
 
 export type HighlightingInfo =

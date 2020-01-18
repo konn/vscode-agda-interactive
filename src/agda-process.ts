@@ -40,6 +40,7 @@ import { toDecoration } from "./decorations";
 import { DisplayInfo } from "./display-info";
 import { AgdaConsole, ConsoleAction, Idle } from "./agda-console";
 import { Transform } from "stream";
+import CodePointCounter from "./codepoint-counter";
 
 export default class AgdaProcess implements Disposable {
   private agda: ChildProcess | undefined;
@@ -53,11 +54,22 @@ export default class AgdaProcess implements Disposable {
   private outputChan: OutputChannel;
   private diags: DiagnosticCollection;
   private inputStream: Transform = new Transform();
+  private codeCounter: CodePointCounter;
 
   constructor(textEditor: TextEditor) {
     this.procMutex = new Mutex();
     this.filePath = textEditor.document.fileName;
     this.document = textEditor.document;
+    this.codeCounter = new CodePointCounter(this.document.getText());
+    this.subscriptions.push(
+      workspace.onDidChangeTextDocument(evt => {
+        if (evt.document === this.document) {
+          evt.contentChanges.forEach(v => {
+            this.codeCounter.updateText(v.rangeOffset, v.rangeLength, v.text);
+          });
+        }
+      })
+    );
     this.outputChan = window.createOutputChannel(
       `Agda (${workspace.asRelativePath(this.filePath)})`
     );
@@ -191,7 +203,7 @@ export default class AgdaProcess implements Disposable {
           for (const iid of resp.interactionPoints) {
             this.issueCommand(
               editor,
-              new GoalType(Rewrite.AsIs, iid, NoRange.NoRange, "")
+              new GoalType(Rewrite.AsIs, iid.id, iid.range, "")
             );
           }
           break;
@@ -254,8 +266,12 @@ export default class AgdaProcess implements Disposable {
     if (info) {
       console.log(`Highlighting ala: ${JSON.stringify(info)}`);
       for (const [[beg, end], asps] of info.payload) {
-        const start = utils.wiseButSlowPositionAt(editor.document, beg - 1);
-        const stop = utils.wiseButSlowPositionAt(editor.document, end - 1);
+        const start = this.document.positionAt(
+          this.codeCounter.toUtf16Offset(beg - 1) || 0
+        );
+        const stop = this.document.positionAt(
+          this.codeCounter.toUtf16Offset(end - 1) || 0
+        );
         const range = new Range(start, stop);
         // const remove = info.remove;
         if (info.remove) {

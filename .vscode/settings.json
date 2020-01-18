@@ -14,5 +14,6 @@
     "spellright.documentTypes": [
         "markdown",
         "latex"
-    ]
+    ],
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
